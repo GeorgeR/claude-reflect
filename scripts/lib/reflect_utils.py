@@ -56,6 +56,8 @@ def migrate_global_queue() -> None:
         return
 
     if not items:
+        # Empty global queue — remove file so future calls skip immediately
+        global_path.unlink(missing_ok=True)
         return
 
     # Group items by project
@@ -89,8 +91,8 @@ def migrate_global_queue() -> None:
         except Exception:
             continue
 
-    # Clear global queue after successful migration
-    global_path.write_text("[]", encoding="utf-8")
+    # Remove global queue after successful migration so future calls skip via exists() check
+    global_path.unlink(missing_ok=True)
 
 
 def get_backup_dir() -> Path:

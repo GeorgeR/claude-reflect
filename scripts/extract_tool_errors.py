@@ -27,6 +27,7 @@ from lib.reflect_utils import (
     extract_tool_errors,
     aggregate_tool_errors,
     get_claude_dir,
+    get_project_folder_name,
 )
 
 
@@ -43,12 +44,7 @@ def find_session_files(project_dir: str = None, all_projects: bool = False) -> l
         session_files = list(projects_dir.glob("*/*.jsonl"))
     elif project_dir:
         # Find the project folder matching the directory
-        # Project folders are named like: -Users-bayramannakov-GH-project-name
-        project_path = Path(project_dir).resolve()
-        folder_name = str(project_path).replace("/", "-").replace("\\", "-")
-        if folder_name.startswith("-"):
-            folder_name = folder_name[1:]
-        folder_name = "-" + folder_name
+        folder_name = get_project_folder_name(project_dir)
 
         project_folder = projects_dir / folder_name
         if project_folder.exists():

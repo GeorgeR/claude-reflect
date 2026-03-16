@@ -6,6 +6,7 @@ suggest_claude_file (enhanced routing), auto memory utilities, read_all_memory_e
 """
 import json
 import os
+import platform
 import sys
 import tempfile
 import unittest
@@ -264,26 +265,32 @@ class TestSuggestClaudeFileEnhanced(unittest.TestCase):
 class TestAutoMemoryPath(unittest.TestCase):
     """Tests for auto memory path utilities."""
 
+    @unittest.skipIf(platform.system() == "Windows", "Unix-specific path encoding")
     def test_folder_name_encoding_unix(self):
         """Test project folder name encoding for Unix paths."""
         result = get_project_folder_name("/Users/bob/myapp")
-        # Path.resolve() may prepend drive letter on Windows, so compute expected dynamically
-        resolved = str(Path("/Users/bob/myapp").resolve()).replace("/", "-").replace("\\", "-").lstrip("-")
-        self.assertEqual(result, "-" + resolved)
+        self.assertEqual(result, "-Users-bob-myapp")
 
+    @unittest.skipIf(platform.system() == "Windows", "Unix-specific path encoding")
     def test_folder_name_encoding_deep(self):
         """Test project folder name encoding for deep paths."""
         result = get_project_folder_name("/Users/bob/code/projects/myapp")
-        resolved = str(Path("/Users/bob/code/projects/myapp").resolve()).replace("/", "-").replace("\\", "-").lstrip("-")
-        self.assertEqual(result, "-" + resolved)
+        self.assertEqual(result, "-Users-bob-code-projects-myapp")
 
+    def test_folder_name_encoding_structure(self):
+        """Test folder name encoding produces valid structure on any platform."""
+        result = get_project_folder_name(tempfile.gettempdir())
+        self.assertTrue(result.startswith("-"))
+        self.assertNotIn("/", result)
+        self.assertNotIn("\\", result)
+
+    @unittest.skipIf(platform.system() == "Windows", "Unix-specific path encoding")
     @patch("lib.reflect_utils.get_claude_dir")
     def test_auto_memory_path_resolution(self, mock_claude_dir):
         """Test auto memory path is correctly resolved."""
         mock_claude_dir.return_value = Path("/home/user/.claude")
         path = get_auto_memory_path("/Users/bob/myapp")
-        expected_folder = get_project_folder_name("/Users/bob/myapp")
-        self.assertEqual(path, Path("/home/user/.claude/projects") / expected_folder / "memory")
+        self.assertEqual(path, Path("/home/user/.claude/projects/-Users-bob-myapp/memory"))
 
     def test_read_auto_memory_empty(self):
         """Test reading auto memory from nonexistent directory."""
