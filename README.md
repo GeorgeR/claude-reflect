@@ -14,24 +14,46 @@ A self-learning system for Claude Code that captures corrections and discovers w
 
 When you correct Claude ("no, use gpt-5.1 not gpt-5"), it remembers forever.
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  You correct    │ ──► │  Hook captures  │ ──► │  /reflect adds  │
-│  Claude Code    │     │  to queue       │     │  to CLAUDE.md   │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-      (automatic)            (automatic)            (manual review)
+```mermaid
+---
+config:
+  htmlLabels: false
+---
+flowchart LR
+    A("You correct
+Claude Code
+
+*(automatic)*") --> B("Hook captures
+to queue
+
+*(automatic)*")
+    B --> C("` **/reflect** adds
+to CLAUDE.md
+
+_(manual review)_`")
 ```
 
 ### 2. Discover Workflow Patterns (NEW in v2)
 
 Analyzes your session history to find repeating tasks that could become reusable commands.
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  Your past      │ ──► │ /reflect-skills │ ──► │   Generates     │
-│  sessions       │     │ finds patterns  │     │   /commands     │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-    (68 sessions)         (AI-powered)            (you approve)
+```mermaid
+---
+config:
+  htmlLabels: false
+---
+flowchart LR
+    A("Your past
+sessions
+
+_(68 sessions)_") --> B("`**/reflect-skills**
+finds patterns
+
+_(AI-powered)_`")
+    B --> C("`Generates
+**/commands**
+
+_(you approve)_`")
 ```
 
 Example: You've asked "review my productivity" 12 times → suggests creating `/daily-review`
